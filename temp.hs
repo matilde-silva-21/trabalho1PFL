@@ -6,6 +6,18 @@ maybeToInt :: Maybe Int -> Int
 maybeToInt (Just n) = n
 maybeToInt Nothing = -1
 
+--funçoes para ler os tuples
+tup0 :: (Char, Int, Int) -> Char
+tup0 (x,_,_) = x
+
+tup1 :: (Char, Int, Int) -> Int
+tup1 (_,x,_) = x
+
+tup2 :: (Char, Int, Int) -> Int
+tup2 (_,_,x) = x
+
+--assumptions feitas: um termo só pode ser do tipo a*(variavel^grau) ou a*variavel , nao funciona para termos independentes , nem para variaveis sem coeficiente 
+--os termos sao separados pelos sinais e por espaços e nao pode haver um sinal junto ao coeficiente
 
 --primeiro separar o polinomio, dando origem a uma lista de listas, as quais estao divididas entre coeficiente e variavel*grau de variavel
 --exemplo: "7*y^2 + 3*y + 5*z" ---> [["y^2","7"],["+"],["y","3"],["+"],["z","5"]]
@@ -35,9 +47,18 @@ traversePolinomioHelper [] _ = []
 
 --funçao que normaliza um polinomio em string
 --exemplo: "7*y^2 + 3*y + 5*z" ---> [('y',2,7),('y',1,3),('z',1,5)]
-normalizePolinomio :: String -> [(Char, Int, Int)]
-normalizePolinomio xs = traversePolinomio (splitPolinomio xs)
+adaptPolinomio :: String -> [(Char, Int, Int)]
+adaptPolinomio xs = traversePolinomio (splitPolinomio xs)
 
 
+printPolinomio :: [(Char, Int, Int)] -> String
+printPolinomio xs = printPolinomioHelper xs True
 
+printPolinomioHelper :: [(Char, Int, Int)] -> Bool -> String
+printPolinomioHelper (x:xs) first 
+    | ((tup2 x) < 0 && ((tup1 x) == 1)) = (if (first) then "" else (" - "))++ (show (negate (tup2 x))) ++ "*" ++ [(tup0 x)] ++ (printPolinomioHelper xs False)
+    | ((tup2 x) < 0 && ((tup1 x) /= 1)) = (if (first) then "" else (" - ")) ++ (show (negate (tup2 x))) ++ "*" ++ [(tup0 x)] ++ "^" ++ (show (tup1 x)) ++ (printPolinomioHelper xs False)
+    | ((tup2 x) > 0 && ((tup1 x) == 1)) = (if (first) then "" else (" + ")) ++ (show (tup2 x)) ++ "*" ++ [(tup0 x)] ++ (printPolinomioHelper xs False)
+    | otherwise = (if (first) then "" else ("- ")) ++ (show (tup2 x)) ++ "*" ++ [(tup0 x)] ++ "^" ++ (show (tup1 x)) ++ (printPolinomioHelper xs False)
+printPolinomioHelper [] _ = "" 
 
