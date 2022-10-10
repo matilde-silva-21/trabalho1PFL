@@ -72,6 +72,7 @@ printPolinomio xs = printPolinomioHelper xs True
 
 printPolinomioHelper :: [(Char, Int, Int)] -> Bool -> String
 printPolinomioHelper (x:xs) first 
+    | ((tup2 x) == 0) = printPolinomioHelper xs first
     | (((tup0 x) == '~') && ((tup2 x) < 0)) = (if (first) then "" else (" - ")) ++ (show (negate (tup2 x))) ++ (printPolinomioHelper xs False)
     | (((tup0 x) == '~') && ((tup2 x) > 0)) = (if (first) then "" else (" + ")) ++ (show (tup2 x))++ (printPolinomioHelper xs False)
     | ((tup2 x) < 0 && ((tup1 x) == 1)) = (if (first) then "" else (" - ")) ++ (if ((tup2 x) == -1) then "" else ((show (negate (tup2 x)))  ++ "*")) ++ [(tup0 x)] ++ (printPolinomioHelper xs False)
@@ -86,7 +87,8 @@ findMoreVarsWithSameDegree :: Char -> Int -> [(Char, Int, Int)] -> [(Char, Int, 
 findMoreVarsWithSameDegree cr dgr xs = [ x | x<-xs, ((tup0 x) == cr) && (dgr == (tup1 x))]
 
 sumVarsWithSameDegree :: [(Char, Int, Int)] -> (Char, Int, Int)
-sumVarsWithSameDegree xs =  ((tup0 (xs !! 0)), (tup1 (xs !! 0)), (sum ([(tup2 x) | x<-xs])))
+sumVarsWithSameDegree xs =  ((tup0 (xs !! 0)), (tup1 (xs !! 0)), y)
+    where y = sum ([(tup2 x) | x<-xs])
 
 reducePolinomio :: [(Char, Int, Int)] -> [(Char, Int, Int)]
 reducePolinomio xs = removeDuplicates [ sumVarsWithSameDegree (findMoreVarsWithSameDegree (tup0 x) (tup1 x) xs) | x<-xs]
