@@ -2,6 +2,7 @@ import Data.List.Split
 import Data.List
 import Data.Char
 
+
 -- funcao que transforma Maybe Int em Int
 maybeToInt :: Maybe Int -> Int
 maybeToInt (Just n) = n
@@ -17,7 +18,18 @@ tup1 (_,x,_) = x
 tup2 :: (Char, Int, Int) -> Int
 tup2 (_,_,x) = x
 
---assumptions feitas: um termo só pode ser do tipo a*(variavel^grau) ou a*variavel , nao funciona para termos independentes , nem para variaveis sem coeficiente 
+-- funcao para remover elementos duplicados de uma lista
+removeDuplicates :: (Eq a) => [a] -> [a]
+removeDuplicates list = remDups list []
+
+remDups :: (Eq a) => [a] -> [a] -> [a]
+remDups [] _ = []
+remDups (x:xs) list2
+    | (x `elem` list2) = remDups xs list2
+    | otherwise = x : remDups xs (x:list2)
+
+
+--assumptions feitas: um termo só pode ser do tipo a*(variavel^grau) ou a*variavel ou variavel ou termo independente
 --os termos sao separados pelos sinais e por espaços e nao pode haver um sinal junto ao coeficiente
 
 --primeiro separar o polinomio, dando origem a uma lista de listas, as quais estao divididas entre coeficiente e variavel*grau de variavel
@@ -68,3 +80,16 @@ printPolinomioHelper (x:xs) first
     | otherwise = (if (first) then "" else (" + ")) ++ (if ((tup2 x) == 1) then "" else ((show (tup2 x))  ++ "*")) ++ [(tup0 x)] ++ "^" ++ (show (tup1 x)) ++ (printPolinomioHelper xs False)
 printPolinomioHelper [] _ = "" 
 
+
+
+findMoreVarsWithSameDegree :: Char -> Int -> [(Char, Int, Int)] -> [(Char, Int, Int)]
+findMoreVarsWithSameDegree cr dgr xs = [ x | x<-xs, ((tup0 x) == cr) && (dgr == (tup1 x))]
+
+sumVarsWithSameDegree :: [(Char, Int, Int)] -> (Char, Int, Int)
+sumVarsWithSameDegree xs =  ((tup0 (xs !! 0)), (tup1 (xs !! 0)), (sum ([(tup2 x) | x<-xs])))
+
+reducePolinomio :: [(Char, Int, Int)] -> [(Char, Int, Int)]
+reducePolinomio xs = removeDuplicates [ sumVarsWithSameDegree (findMoreVarsWithSameDegree (tup0 x) (tup1 x) xs) | x<-xs]
+
+normalizarPolinomio :: String -> String
+normalizarPolinomio xs = printPolinomio(reducePolinomio (adaptPolinomio xs))
