@@ -1,5 +1,6 @@
 import Data.List.Split
 import Data.List
+import Data.Char
 
 -- funcao que transforma Maybe Int em Int
 maybeToInt :: Maybe Int -> Int
@@ -33,11 +34,14 @@ traversePolinomio xs = traversePolinomioHelper xs True
 
 -- 1º verifica se o elemento atual é um sinal ou uma variavel, se for um sinal positivo chama a funcao com positivo = True, se for sinal negativo chama a funçao com positivo = False, para a prox variavel saber o seu sinal
 -- 2º verifica se está perante uma variavel com grau igual ou superior a 1 (se length da variavel for igual que 1 entao nao tem "^" no meio da sua string e por isso o grau é 1)
--- 3º para variáveis com grau superior a 1, verifica se o coeficiente de um numero é 0, porque se for, nem vale a pena adicionar a lista de Truples (esta parte tambem está incluida na 2ª verificaçao)
+-- 3º verifica se está perante um termo independente ou perante um termo de grau e coeficiente 1, para um qualquer termo independente n o tuple é ('~', 0, n)
+-- 4º para variáveis com grau superior a 1, verifica se o coeficiente de um numero é 0, porque se for, nem vale a pena adicionar a lista de Truples (esta parte tambem está incluida na 2ª verificaçao)
 traversePolinomioHelper :: [[String]] -> Bool -> [(Char, Int, Int)]
 traversePolinomioHelper (x:xs) positive
     | ((x!!0) == "+") = (traversePolinomioHelper(xs) True)
     | ((x!!0) == "-") = (traversePolinomioHelper(xs) False)
+    | ((length x) == 1 && positive) = if(isDigit((x!!0) !! 0)) then [('~',0, (read (x !! 0) :: Int))] ++ (traversePolinomioHelper(xs) True) else [((x!!0) !! 0, 1, 1)] ++ (traversePolinomioHelper(xs) True)
+    | ((length x) == 1 && not positive) = if(isDigit((x!!0) !! 0)) then [('~',0, negate (read (x !! 0) :: Int))] ++ (traversePolinomioHelper(xs) True) else [((x!!0) !! 0, 1, -1)] ++ (traversePolinomioHelper(xs) True)
     | ((length (x!!0)) == 1) = if (positive) then [((x !! 0) !! 0, 1, (read (x !! 1) :: Int))] ++ (traversePolinomioHelper(xs) True) else if ((x !! 1)=="0") then traversePolinomioHelper(xs) True else [((x !! 0) !! 0, 1, negate (read (x !! 1) :: Int))] ++ (traversePolinomioHelper(xs) True)
     | ((x !! 1)=="0") = traversePolinomioHelper(xs) True
     | ((x !! 1)/="0") = if (positive) then [((x !! 0) !! 0, read [((x !! 0) !! 2)] :: Int, (read (x !! 1) :: Int))] ++ (traversePolinomioHelper(xs) True) else [((x !! 0) !! 0, read [((x !! 0) !! 2)] :: Int, negate (read (x !! 1) :: Int))] ++ (traversePolinomioHelper(xs) True)
@@ -56,9 +60,11 @@ printPolinomio xs = printPolinomioHelper xs True
 
 printPolinomioHelper :: [(Char, Int, Int)] -> Bool -> String
 printPolinomioHelper (x:xs) first 
-    | ((tup2 x) < 0 && ((tup1 x) == 1)) = (if (first) then "" else (" - "))++ (show (negate (tup2 x))) ++ "*" ++ [(tup0 x)] ++ (printPolinomioHelper xs False)
-    | ((tup2 x) < 0 && ((tup1 x) /= 1)) = (if (first) then "" else (" - ")) ++ (show (negate (tup2 x))) ++ "*" ++ [(tup0 x)] ++ "^" ++ (show (tup1 x)) ++ (printPolinomioHelper xs False)
-    | ((tup2 x) > 0 && ((tup1 x) == 1)) = (if (first) then "" else (" + ")) ++ (show (tup2 x)) ++ "*" ++ [(tup0 x)] ++ (printPolinomioHelper xs False)
-    | otherwise = (if (first) then "" else ("- ")) ++ (show (tup2 x)) ++ "*" ++ [(tup0 x)] ++ "^" ++ (show (tup1 x)) ++ (printPolinomioHelper xs False)
+    | (((tup0 x) == '~') && ((tup2 x) < 0)) = (if (first) then "" else (" - ")) ++ (show (negate (tup2 x))) ++ (printPolinomioHelper xs False)
+    | (((tup0 x) == '~') && ((tup2 x) > 0)) = (if (first) then "" else (" + ")) ++ (show (tup2 x))++ (printPolinomioHelper xs False)
+    | ((tup2 x) < 0 && ((tup1 x) == 1)) = (if (first) then "" else (" - ")) ++ (if ((tup2 x) == -1) then "" else ((show (negate (tup2 x)))  ++ "*")) ++ [(tup0 x)] ++ (printPolinomioHelper xs False)
+    | ((tup2 x) < 0 && ((tup1 x) /= 1)) = (if (first) then "" else (" - ")) ++ (if ((tup2 x) == -1) then "" else ((show (negate (tup2 x)))  ++ "*")) ++ [(tup0 x)] ++ "^" ++ (show (tup1 x)) ++ (printPolinomioHelper xs False)
+    | ((tup2 x) > 0 && ((tup1 x) == 1)) = (if (first) then "" else (" + ")) ++  (if ((tup2 x) == 1) then "" else ((show (tup2 x))  ++ "*")) ++ [(tup0 x)] ++ (printPolinomioHelper xs False)
+    | otherwise = (if (first) then "" else (" + ")) ++ (if ((tup2 x) == 1) then "" else ((show (tup2 x))  ++ "*")) ++ [(tup0 x)] ++ "^" ++ (show (tup1 x)) ++ (printPolinomioHelper xs False)
 printPolinomioHelper [] _ = "" 
 
