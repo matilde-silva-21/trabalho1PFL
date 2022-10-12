@@ -52,12 +52,18 @@ traversePolinomioHelper :: [[String]] -> Bool -> [(Char, Int, Int)]
 traversePolinomioHelper (x:xs) positive
     | ((x!!0) == "+") = (traversePolinomioHelper(xs) True)
     | ((x!!0) == "-") = (traversePolinomioHelper(xs) False)
-    | ((length x) == 1 && positive) = if(isDigit((x!!0) !! 0)) then [('~',0, (read (x !! 0) :: Int))] ++ (traversePolinomioHelper(xs) True) else [((x!!0) !! 0, 1, 1)] ++ (traversePolinomioHelper(xs) True)
-    | ((length x) == 1 && not positive) = if(isDigit((x!!0) !! 0)) then [('~',0, negate (read (x !! 0) :: Int))] ++ (traversePolinomioHelper(xs) True) else [((x!!0) !! 0, 1, -1)] ++ (traversePolinomioHelper(xs) True)
-    | ((length (x!!0)) == 1) = if (positive) then [((x !! 0) !! 0, 1, (read (x !! 1) :: Int))] ++ (traversePolinomioHelper(xs) True) else if ((x !! 1)=="0") then traversePolinomioHelper(xs) True else [((x !! 0) !! 0, 1, negate (read (x !! 1) :: Int))] ++ (traversePolinomioHelper(xs) True)
+    | ((length x) == 1 && positive) = if(isDigit(firstTerm)) then [('~',0, (number))] ++ (traversePolinomioHelper(xs) True) else [(firstTerm, 1, 1)] ++ (traversePolinomioHelper(xs) True)
+    | ((length x) == 1 && not positive) = if(isDigit(firstTerm)) then [('~',0, negate (number))] ++ (traversePolinomioHelper(xs) True) else [(firstTerm, 1, -1)] ++ (traversePolinomioHelper(xs) True)
+    | ((length (x!!0)) == 1) = if (positive) then [(firstTerm, 1, coeficiente)] ++ (traversePolinomioHelper(xs) True) else if ((x !! 1)=="0") then traversePolinomioHelper(xs) True else [(firstTerm, 1, negate (coeficiente))] ++ (traversePolinomioHelper(xs) True)
     | ((x !! 1)=="0") = traversePolinomioHelper(xs) True
-    | ((x !! 1)/="0") = if (positive) then [((x !! 0) !! 0, read [((x !! 0) !! 2)] :: Int, (read (x !! 1) :: Int))] ++ (traversePolinomioHelper(xs) True) else [((x !! 0) !! 0, read [((x !! 0) !! 2)] :: Int, negate (read (x !! 1) :: Int))] ++ (traversePolinomioHelper(xs) True)
+    | ((x !! 1)/="0") = if (positive) then [(firstTerm, grau, coeficiente)] ++ (traversePolinomioHelper(xs) True) else [(firstTerm, grau, negate (coeficiente))] ++ (traversePolinomioHelper(xs) True)
     | otherwise = (traversePolinomioHelper(xs) True)
+    where {
+        firstTerm = (x!!0) !! 0;
+        number = (read (x !! 0) :: Int);
+        coeficiente = (read (x !! 1) :: Int);
+        grau = read [((x !! 0) !! 2)] :: Int;
+    }
 traversePolinomioHelper [] _ = []
 
 
@@ -73,13 +79,21 @@ printPolinomio xs = printPolinomioHelper xs True
 printPolinomioHelper :: [(Char, Int, Int)] -> Bool -> String
 printPolinomioHelper (x:xs) first 
     | ((tup2 x) == 0) = printPolinomioHelper xs first
-    | (((tup0 x) == '~') && ((tup2 x) < 0)) = (if (first) then "" else (" - ")) ++ (show (negate (tup2 x))) ++ (printPolinomioHelper xs False)
-    | (((tup0 x) == '~') && ((tup2 x) > 0)) = (if (first) then "" else (" + ")) ++ (show (tup2 x))++ (printPolinomioHelper xs False)
-    | ((tup2 x) < 0 && ((tup1 x) == 1)) = (if (first) then "" else (" - ")) ++ (if ((tup2 x) == -1) then "" else ((show (negate (tup2 x)))  ++ "*")) ++ [(tup0 x)] ++ (printPolinomioHelper xs False)
-    | ((tup2 x) < 0 && ((tup1 x) /= 1)) = (if (first) then "" else (" - ")) ++ (if ((tup2 x) == -1) then "" else ((show (negate (tup2 x)))  ++ "*")) ++ [(tup0 x)] ++ "^" ++ (show (tup1 x)) ++ (printPolinomioHelper xs False)
-    | ((tup2 x) > 0 && ((tup1 x) == 1)) = (if (first) then "" else (" + ")) ++  (if ((tup2 x) == 1) then "" else ((show (tup2 x))  ++ "*")) ++ [(tup0 x)] ++ (printPolinomioHelper xs False)
-    | otherwise = (if (first) then "" else (" + ")) ++ (if ((tup2 x) == 1) then "" else ((show (tup2 x))  ++ "*")) ++ [(tup0 x)] ++ "^" ++ (show (tup1 x)) ++ (printPolinomioHelper xs False)
+    | (((tup0 x) == '~') && ((tup2 x) < 0)) = negativePrepend ++ (show (negate (tup2 x))) ++ (printPolinomioHelper xs False)
+    | (((tup0 x) == '~') && ((tup2 x) > 0)) = positivePrepend ++ (show (tup2 x))++ (printPolinomioHelper xs False)
+    | ((tup2 x) < 0 && ((tup1 x) == 1)) = negativePrepend ++ negativeCoeficient ++ variable ++ (printPolinomioHelper xs False)
+    | ((tup2 x) < 0 && ((tup1 x) /= 1)) = negativePrepend ++ negativeCoeficient ++ variable ++ "^" ++ (show (tup1 x)) ++ (printPolinomioHelper xs False)
+    | ((tup2 x) > 0 && ((tup1 x) == 1)) = positivePrepend ++  positiveCoeficient ++ variable ++ (printPolinomioHelper xs False)
+    | otherwise = (positivePrepend) ++ positiveCoeficient ++ variable ++ "^" ++ (show (tup1 x)) ++ (printPolinomioHelper xs False)
+    where {
+        negativePrepend = if (first) then "- " else (" - ");
+        positivePrepend = if (first) then "" else (" + ");
+        negativeCoeficient = if ((tup2 x) == -1) then "" else ((show (negate (tup2 x)))  ++ "*");
+        positiveCoeficient = if ((tup2 x) == 1) then "" else ((show (tup2 x))  ++ "*");
+        variable = [(tup0 x)];
+    }
 printPolinomioHelper [] _ = "" 
+
 
 
 
@@ -94,4 +108,4 @@ reducePolinomio :: [(Char, Int, Int)] -> [(Char, Int, Int)]
 reducePolinomio xs = removeDuplicates [ sumVarsWithSameDegree (findMoreVarsWithSameDegree (tup0 x) (tup1 x) xs) | x<-xs]
 
 normalizarPolinomio :: String -> String
-normalizarPolinomio xs = printPolinomio(reducePolinomio (adaptPolinomio xs))
+normalizarPolinomio xs = printPolinomio (reverse (sortOn tup1 (reducePolinomio (adaptPolinomio xs))))
