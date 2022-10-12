@@ -109,3 +109,6 @@ reducePolinomio xs = removeDuplicates [ sumVarsWithSameDegree (findMoreVarsWithS
 
 normalizarPolinomio :: String -> String
 normalizarPolinomio xs = printPolinomio (reverse (sortOn tup1 (reducePolinomio (adaptPolinomio xs))))
+
+adicionarPolinomio :: String -> String -> String
+adicionarPolinomio x y = normalizarPolinomio (x ++ " " ++ y)
