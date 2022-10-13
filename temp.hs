@@ -87,7 +87,7 @@ traversePolinomioHelper (x:xs) positive
     | ((length x) > 2 && positive) = [(parseMultipleVariables (x) , getDegreeMultipleVariables (x), (read (last x)) :: Int)] ++ (traversePolinomioHelper(xs) True)
     | ((length x) > 2 && not positive) = [(parseMultipleVariables (x) , getDegreeMultipleVariables (x), negate (read (last x)) :: Int)] ++ (traversePolinomioHelper(xs) True)
 
-
+    -- preciso de arranjar forma para dar print a variaveis complexas
     | otherwise = (traversePolinomioHelper(xs) True)
     
     where {
@@ -111,15 +111,25 @@ adaptPolinomio xs = traversePolinomio (splitPolinomio xs)
 printPolinomio :: [(String, Int, Int)] -> String
 printPolinomio xs = printPolinomioHelper xs True
 
+--funcao para dar print de um polinomio
 printPolinomioHelper :: [(String, Int, Int)] -> Bool -> String
 printPolinomioHelper [] _ = ""
 printPolinomioHelper (x:xs) first 
+    -- 1º se o coeficiente for 0, nao dar print do termo
     | ((tup2 x) == 0) = printPolinomioHelper xs first
+    
+    -- 2º se for um termo independente
     | (((tup0 x) == "~") && ((tup2 x) < 0)) = negativePrepend ++ (show (negate (tup2 x))) ++ (printPolinomioHelper xs False)
     | (((tup0 x) == "~") && ((tup2 x) > 0)) = positivePrepend ++ (show (tup2 x))++ (printPolinomioHelper xs False)
+    
+    -- 3º se for uma variavel com grau 1
     | ((tup2 x) < 0 && ((tup1 x) == 1)) = negativePrepend ++ negativeCoeficient ++ variable ++ (printPolinomioHelper xs False)
-    | ((tup2 x) < 0 && ((tup1 x) /= 1)) = negativePrepend ++ negativeCoeficient ++ variable ++ "^" ++ (show (tup1 x)) ++ (printPolinomioHelper xs False)
     | ((tup2 x) > 0 && ((tup1 x) == 1)) = positivePrepend ++  positiveCoeficient ++ variable ++ (printPolinomioHelper xs False)
+    
+
+
+    | ((tup2 x) < 0 && ((tup1 x) /= 1)) = negativePrepend ++ negativeCoeficient ++ variable ++ "^" ++ (show (tup1 x)) ++ (printPolinomioHelper xs False)
+    
     | otherwise = (positivePrepend) ++ positiveCoeficient ++ variable ++ "^" ++ (show (tup1 x)) ++ (printPolinomioHelper xs False)
     where {
         negativePrepend = if (first) then "- " else (" - ");
