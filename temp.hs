@@ -87,7 +87,6 @@ traversePolinomioHelper (x:xs) positive
     | ((length x) > 2 && positive) = [(parseMultipleVariables (x) , getDegreeMultipleVariables (x), (read (last x)) :: Int)] ++ (traversePolinomioHelper(xs) True)
     | ((length x) > 2 && not positive) = [(parseMultipleVariables (x) , getDegreeMultipleVariables (x), negate (read (last x)) :: Int)] ++ (traversePolinomioHelper(xs) True)
 
-    -- preciso de arranjar forma para dar print a variaveis complexas
     | otherwise = (traversePolinomioHelper(xs) True)
     
     where {
@@ -126,8 +125,10 @@ printPolinomioHelper (x:xs) first
     | ((tup2 x) < 0 && ((tup1 x) == 1)) = negativePrepend ++ negativeCoeficient ++ variable ++ (printPolinomioHelper xs False)
     | ((tup2 x) > 0 && ((tup1 x) == 1)) = positivePrepend ++  positiveCoeficient ++ variable ++ (printPolinomioHelper xs False)
     
-
-
+    
+    -- preciso de arranjar forma para dar print a variaveis complexas
+    
+    
     | ((tup2 x) < 0 && ((tup1 x) /= 1)) = negativePrepend ++ negativeCoeficient ++ variable ++ "^" ++ (show (tup1 x)) ++ (printPolinomioHelper xs False)
     
     | otherwise = (positivePrepend) ++ positiveCoeficient ++ variable ++ "^" ++ (show (tup1 x)) ++ (printPolinomioHelper xs False)
