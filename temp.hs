@@ -46,14 +46,15 @@ splitPolinomio :: String -> [[String]]
 splitPolinomio x = [reverse (sortOn length (splitOneOf "*" y)) | y<-(split (oneOf " +-") x), y/="", y/=" "]
 
 
+--funcao que pega no array de um termo e guarda todas as variaveis numa so string
+parseMultipleVariables :: [String] -> String
+parseMultipleVariables [] = ""
+parseMultipleVariables (x:xs) = sort ([ y | y<-x , (((fromEnum y) > 64 && (fromEnum y) < 91) || ((fromEnum y) > 96 && (fromEnum y) < 123)) ] ++ parseMultipleVariables xs)
 
-parseMultipleVariables :: [String] -> (String, Int, Int)
-parseMultipleVariables [] = []
-parseMultipleVariables (x:xs) = --se for digito vai direto para o coeficiente, depois fazer parse do resto dos elementos (que sao variaveis), se nao tiver grau meter na string de variaveis logo e adicionar 1 ao coeficiente, se tiver grau usar o splitOneOf e adicionar o grau, e concatenar a string 
--- nao esquecer dar sort a string das variaveis
-
-
-
+--funcao que pega no array de um termo e calcula o grau de uma variavel complexa 
+getDegreeMultipleVariables :: [String] -> Int
+getDegreeMultipleVariables (x:xs) = if(length x == 1 && not (isNumber(x))) then (1 +  getDegreeMultipleVariables xs) else if (length x > 1 && not (isNumber(x))) then (((read [last x] ):: Int) + getDegreeMultipleVariables xs) else getDegreeMultipleVariables xs
+getDegreeMultipleVariables [] = 0
 
 
 --interface que vai transformar o polinomio separado em uma lista de Truples com (variavel, grau da variável, coeficiente)
@@ -66,11 +67,12 @@ traversePolinomio xs = traversePolinomioHelper xs True
 -- 1º verifica se o elemento atual é um sinal ou uma variavel, ou se o coeficiente é zero, se for um sinal positivo chama a funcao com positivo = True, se for sinal negativo chama a funçao com positivo = False, para a prox variavel saber o seu sinal. se for um termo com coeficiente zero é ignorado
 -- 2º verifica se está perante um termo independente ou perante um termo de grau e coeficiente igual a 1, para um qualquer termo independente n o tuple é ('~', 0, n), duas guardas separadas para se coeficiente for neg ou positivo 
 -- 3º para variáveis sozinhas (sem ser x*y por exemplo) verifica se tem length maior que 1, se sim a string é do tipo "x^n", se nao o grau é 1. mais duas guardas caso o coeficiente seja neg ou positivo
+-- 4º para variaveis complexas (x*y) usa duas funcoes helper
 traversePolinomioHelper :: [[String]] -> Bool -> [(String, Int, Int)]
 traversePolinomioHelper [] _ = []
 traversePolinomioHelper (x:xs) positive
     -- 1º
-    | (((x!!0) == "+") || ((tail (x)!!0) == "0")) = (traversePolinomioHelper(xs) True)
+    | (((x!!0) == "+") || (last x) == "0") = (traversePolinomioHelper(xs) True)
     | ((x!!0) == "-") = (traversePolinomioHelper(xs) False)
     -- 2º
     | ((length x) == 1 && positive) = if(isNumber(firstTerm)) then [("~",0, (number))] ++ (traversePolinomioHelper(xs) True) else [(firstTerm, 1, 1)] ++ (traversePolinomioHelper(xs) True)
@@ -81,8 +83,13 @@ traversePolinomioHelper (x:xs) positive
     -- 3º variaveis de grau n
     | ((length x) == 2 && positive && length (x!!0) > 1) = [(x!!0, grau, coeficiente)] ++ (traversePolinomioHelper(xs) True)
     | ((length x) == 2 && not positive && length (x!!0) > 1) = [(x!!0, grau, negate coeficiente)] ++ (traversePolinomioHelper(xs) True)
+    -- 4º variaveis nao simples
+    | ((length x) > 2 && positive) = [(parseMultipleVariables (x) , getDegreeMultipleVariables (x), (read (last x)) :: Int)] ++ (traversePolinomioHelper(xs) True)
+    | ((length x) > 2 && not positive) = [(parseMultipleVariables (x) , getDegreeMultipleVariables (x), negate (read (last x)) :: Int)] ++ (traversePolinomioHelper(xs) True)
+
 
     | otherwise = (traversePolinomioHelper(xs) True)
+    
     where {
         firstTerm = (x!!0);
         number = (read (x !! 0) :: Int);
