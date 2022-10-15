@@ -14,7 +14,9 @@ arrGetCoef (_,x) = x
 
 arrGetVarTuple :: ([(Char, Int)], Int) -> [(Char, Int)]
 arrGetVarTuple (x,_) = x
-
+ 
+arrGetDegree :: ([(Char, Int)], Int) -> Int
+arrGetDegree (x,y) = sum [tupleGetDegree (a) | a<-x]
 
 
 -- funcao para remover elementos duplicados de uma lista
@@ -146,7 +148,7 @@ printPolinomioHelper (x:xs) first
     
     where {
         vars = printVars (arrGetVarTuple x);
-        negativePrepend = if (first) then "- " else (" - ");
+        negativePrepend = if (first) then "-" else (" - ");
         positivePrepend = if (first) then "" else (" + ");
         negativeCoeficient = if ((arrGetCoef x) == -1) then "" else ((show (negate (arrGetCoef x)))  ++ "*");
         positiveCoeficient = if ((arrGetCoef x) == 1) then "" else ((show (arrGetCoef x))  ++ "*");
@@ -168,7 +170,7 @@ reducePolinomio xs = removeDuplicates [ sumVarsWithSameDegree (findMoreVarsWithS
 
 
 normalizarPolinomio :: String -> String
-normalizarPolinomio xs = printPolinomio (reverse (sortOn arrGetCoef (reducePolinomio (adaptPolinomio xs))))
+normalizarPolinomio xs = printPolinomio (reverse (sortOn arrGetDegree (reducePolinomio (adaptPolinomio xs))))
 
 
 adicionarPolinomio :: String -> String -> String
