@@ -2,11 +2,6 @@ import Data.List.Split
 import Data.List
 
 
--- funcao que transforma Maybe Int em Int
-maybeToInt :: Maybe Int -> Int
-maybeToInt (Just n) = n
-maybeToInt Nothing = -1
-
 --funçoes para ler os tuples
 tupleGetVar :: (Char, Int)  -> Char
 tupleGetVar (x,_) = x
@@ -19,6 +14,7 @@ arrGetCoef (_,x) = x
 
 arrGetVarTuple :: ([(Char, Int)], Int) -> [(Char, Int)]
 arrGetVarTuple (x,_) = x
+
 
 
 -- funcao para remover elementos duplicados de uma lista
@@ -40,23 +36,25 @@ isNumber str =
       _         -> False
 
 
+--funçao que obtem o grau de uma variavel x^n
+getVarDegree :: String -> Int
+getVarDegree x = if(length x == 1) then 1 else read ([last x]) :: Int
 
---assumptions feitas: o coeficiente vem SEMPRE antes das variaveis a*x*y
---os termos sao separados pelos sinais e por espaços e nao pode haver um sinal junto ao coeficiente
+--funcao que pega no array de um termo e guarda todas as variaveis num tuple(variavel, grau variavel)
+parseMultipleVariables :: [String] -> [(Char, Int)]
+parseMultipleVariables [] = []
+parseMultipleVariables (x:xs) = sort ([(y, getVarDegree x) | y<-x, (((fromEnum y) > 64 && (fromEnum y) < 91) || ((fromEnum y) > 96 && (fromEnum y) < 123))] ++ parseMultipleVariables xs)
+
+
+--assumptions feitas:
+--      o coeficiente vem SEMPRE antes das variaveis a*x*y
+--      nao existem vars do tipo x*x
+--      nao existem termos do tipo a*b*x, em que a*b é o coef
 
 --primeiro separar o polinomio, dando origem a uma lista de listas, as quais estao divididas entre coeficiente e variavel*grau de variavel
 --exemplo: "7*y^2 + 3*y + 5*z" ---> [["y^2","7"],["+"],["y","3"],["+"],["z","5"]]
 splitPolinomio :: String -> [[String]]
 splitPolinomio x = [reverse (sortOn length (splitOneOf "*" y)) | y<-(split (oneOf " +-") x), y/="", y/=" "]
-
-
-getVarDegree :: String -> Int
-getVarDegree x = if(length x == 1) then 1 else read ([last x]) :: Int
-
---funcao que pega no array de um termo e guarda todas as variaveis
-parseMultipleVariables :: [String] -> [(Char, Int)]
-parseMultipleVariables [] = []
-parseMultipleVariables (x:xs) = sort ([(y, getVarDegree x) | y<-x, (((fromEnum y) > 64 && (fromEnum y) < 91) || ((fromEnum y) > 96 && (fromEnum y) < 123))] ++ parseMultipleVariables xs)
 
 
 --interface que vai transformar o polinomio separado em uma lista de tuples com o primeiro argumento igual a uma outra lista de tuples (variavel, grau) e segundo argumento igual a coeficiente
@@ -69,7 +67,7 @@ traversePolinomio xs = traversePolinomioHelper xs True
 -- 1º verifica se o elemento atual é um sinal ou uma variavel, ou se o coeficiente é zero, se for um sinal positivo chama a funcao com positivo = True, se for sinal negativo chama a funçao com positivo = False, para a prox variavel saber o seu sinal. se for um termo com coeficiente zero é ignorado
 -- 2º verifica se está perante um termo independente ou perante um termo de coeficiente igual a 1, para um qualquer termo independente n o tuple é ('~', 0, n), duas guardas separadas para se coeficiente for neg ou positivo 
 -- 3º para variáveis sozinhas (sem ser x*y por exemplo) verifica se tem length maior que 1, se sim a string é do tipo "x^n", se nao o grau é 1. mais duas guardas caso o coeficiente seja neg ou positivo
--- 4º para variaveis complexas (x*y) usa duas funcoes helper
+-- 4º para variaveis complexas (x*y) usa uma funcao helper
 traversePolinomioHelper :: [[String]] -> Bool -> [([(Char, Int)], Int)]
 traversePolinomioHelper [] _ = []
 traversePolinomioHelper (x:xs) positive
@@ -155,22 +153,25 @@ printPolinomioHelper (x:xs) first
     } 
 
 
-{-
 
-findMoreVarsWithSameDegree :: String -> Int -> [(String, Int, Int)] -> [(String, Int, Int)]
-findMoreVarsWithSameDegree cr dgr xs = [ x | x<-xs, ((tup0 x) == cr) && (dgr == (arrGetCoef x))]
 
-sumVarsWithSameDegree :: [(String, Int, Int)] -> (String, Int, Int)
-sumVarsWithSameDegree xs =  ((tup0 (xs !! 0)), (arrGetCoef (xs !! 0)), y)
-    where y = sum ([(arrGetCoef x) | x<-xs])
+findMoreVarsWithSameDegree :: [(Char, Int)] -> [([(Char, Int)], Int)] -> [([(Char, Int)], Int)]
+findMoreVarsWithSameDegree cr xs = [ x | x<-xs, (arrGetVarTuple(x)) == cr]
 
-reducePolinomio :: [(String, Int, Int)] -> [(String, Int, Int)]
-reducePolinomio xs = removeDuplicates [ sumVarsWithSameDegree (findMoreVarsWithSameDegree (tup0 x) (arrGetCoef x) xs) | x<-xs]
+
+sumVarsWithSameDegree :: [([(Char, Int)], Int)] -> ([(Char, Int)], Int)
+sumVarsWithSameDegree xs = ( arrGetVarTuple (xs!!0), (sum ([(arrGetCoef(x)) | x<-xs])))
+
+
+reducePolinomio :: [([(Char, Int)], Int)] -> [([(Char, Int)], Int)]
+reducePolinomio xs = removeDuplicates [ sumVarsWithSameDegree (findMoreVarsWithSameDegree (arrGetVarTuple x) xs) | x<-xs]
+
 
 normalizarPolinomio :: String -> String
 normalizarPolinomio xs = printPolinomio (reverse (sortOn arrGetCoef (reducePolinomio (adaptPolinomio xs))))
 
+
 adicionarPolinomio :: String -> String -> String
 adicionarPolinomio x y = normalizarPolinomio (x ++ " " ++ y)
--}
+
 
