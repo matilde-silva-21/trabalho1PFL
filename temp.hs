@@ -8,14 +8,18 @@ maybeToInt (Just n) = n
 maybeToInt Nothing = -1
 
 --funçoes para ler os tuples
-tup0 :: (String, Int, Int) -> String
-tup0 (x,_,_) = x
+tupleGetVar :: (Char, Int)  -> Char
+tupleGetVar (x,_) = x
 
-tup1 :: (String, Int, Int) -> Int
-tup1 (_,x,_) = x
+tupleGetDegree :: (Char, Int)  -> Int
+tupleGetDegree (_,x) = x
 
-tup2 :: (String, Int, Int) -> Int
-tup2 (_,_,x) = x
+arrGetCoef :: ([(Char, Int)], Int) -> Int
+arrGetCoef (_,x) = x
+
+arrGetVarTuple :: ([(Char, Int)], Int) -> [(Char, Int)]
+arrGetVarTuple (x,_) = x
+
 
 -- funcao para remover elementos duplicados de uma lista
 removeDuplicates :: (Eq a) => [a] -> [a]
@@ -46,51 +50,55 @@ splitPolinomio :: String -> [[String]]
 splitPolinomio x = [reverse (sortOn length (splitOneOf "*" y)) | y<-(split (oneOf " +-") x), y/="", y/=" "]
 
 
---funcao que pega no array de um termo e guarda todas as variaveis numa so string
-parseMultipleVariables :: [String] -> String
-parseMultipleVariables [] = ""
-parseMultipleVariables (x:xs) = sort ([ y | y<-x , (((fromEnum y) > 64 && (fromEnum y) < 91) || ((fromEnum y) > 96 && (fromEnum y) < 123)) ] ++ parseMultipleVariables xs)
+getVarDegree :: String -> Int
+getVarDegree x = if(length x == 1) then 1 else read ([last x]) :: Int
 
---funcao que pega no array de um termo e calcula o grau de uma variavel complexa 
-getDegreeMultipleVariables :: [String] -> Int
-getDegreeMultipleVariables (x:xs) = if(length x == 1 && not (isNumber(x))) then (1 +  getDegreeMultipleVariables xs) else if (length x > 1 && not (isNumber(x))) then (((read [last x] ):: Int) + getDegreeMultipleVariables xs) else getDegreeMultipleVariables xs
-getDegreeMultipleVariables [] = 0
+--funcao que pega no array de um termo e guarda todas as variaveis
+parseMultipleVariables :: [String] -> [(Char, Int)]
+parseMultipleVariables [] = []
+parseMultipleVariables (x:xs) = sort ([(y, getVarDegree x) | y<-x, (((fromEnum y) > 64 && (fromEnum y) < 91) || ((fromEnum y) > 96 && (fromEnum y) < 123))] ++ parseMultipleVariables xs)
 
 
---interface que vai transformar o polinomio separado em uma lista de Truples com (variavel, grau da variável, coeficiente)
-traversePolinomio :: [[String]] -> [(String, Int, Int)]
+--interface que vai transformar o polinomio separado em uma lista de tuples com o primeiro argumento igual a uma outra lista de tuples (variavel, grau) e segundo argumento igual a coeficiente
+traversePolinomio :: [[String]] -> [([(Char, Int)], Int)]
 traversePolinomio xs = traversePolinomioHelper xs True
 
 
 --funçao que faz o trabalho pesado da funçao traversePolinomio
 
 -- 1º verifica se o elemento atual é um sinal ou uma variavel, ou se o coeficiente é zero, se for um sinal positivo chama a funcao com positivo = True, se for sinal negativo chama a funçao com positivo = False, para a prox variavel saber o seu sinal. se for um termo com coeficiente zero é ignorado
--- 2º verifica se está perante um termo independente ou perante um termo de grau e coeficiente igual a 1, para um qualquer termo independente n o tuple é ('~', 0, n), duas guardas separadas para se coeficiente for neg ou positivo 
+-- 2º verifica se está perante um termo independente ou perante um termo de coeficiente igual a 1, para um qualquer termo independente n o tuple é ('~', 0, n), duas guardas separadas para se coeficiente for neg ou positivo 
 -- 3º para variáveis sozinhas (sem ser x*y por exemplo) verifica se tem length maior que 1, se sim a string é do tipo "x^n", se nao o grau é 1. mais duas guardas caso o coeficiente seja neg ou positivo
 -- 4º para variaveis complexas (x*y) usa duas funcoes helper
-traversePolinomioHelper :: [[String]] -> Bool -> [(String, Int, Int)]
+traversePolinomioHelper :: [[String]] -> Bool -> [([(Char, Int)], Int)]
 traversePolinomioHelper [] _ = []
 traversePolinomioHelper (x:xs) positive
     -- 1º
     | (((x!!0) == "+") || (last x) == "0") = (traversePolinomioHelper(xs) True)
     | ((x!!0) == "-") = (traversePolinomioHelper(xs) False)
-    -- 2º
-    | ((length x) == 1 && positive) = if(isNumber(firstTerm)) then [("~",0, (number))] ++ (traversePolinomioHelper(xs) True) else [(firstTerm, 1, 1)] ++ (traversePolinomioHelper(xs) True)
-    | ((length x) == 1 && not positive) = if(isNumber(firstTerm)) then [("~",0, negate (number))] ++ (traversePolinomioHelper(xs) True) else [(firstTerm, 1, -1)] ++ (traversePolinomioHelper(xs) True)
-    -- 3º variaveis de grau 1
-    | ((length x) == 2 && positive && length (x!!0) == 1) = [(x!!0, 1, coeficiente)] ++ (traversePolinomioHelper(xs) True)
-    | ((length x) == 2 && not positive && length (x!!0) == 1) = [(x!!0, 1, negate coeficiente)] ++ (traversePolinomioHelper(xs) True)
-    -- 3º variaveis de grau n
-    | ((length x) == 2 && positive && length (x!!0) > 1) = [(x!!0, grau, coeficiente)] ++ (traversePolinomioHelper(xs) True)
-    | ((length x) == 2 && not positive && length (x!!0) > 1) = [(x!!0, grau, negate coeficiente)] ++ (traversePolinomioHelper(xs) True)
+    -- 2º termos com modulo do coef e grau igual a 1 ou termos independentes
+    | ((length x) == 1 && positive && (length (x!!0) == 1)) = if(isNumber([firstTerm])) then [([('~',0)], (number))] ++ (traversePolinomioHelper(xs) True) else [([(firstTerm, 1)], 1)] ++ (traversePolinomioHelper(xs) True)
+    | ((length x) == 1 && not positive && (length (x!!0) == 1)) = if(isNumber([firstTerm])) then [([('~',0)], negate (number))] ++ (traversePolinomioHelper(xs) True) else [([(firstTerm, 1)], -1)] ++ (traversePolinomioHelper(xs) True)
+    -- 2º termos com modulo do coef igual a 1 e grau > 1
+    | ((length x) == 1 && positive && (length (x!!0) /= 1)) = [([(firstTerm, grau)], 1)] ++ (traversePolinomioHelper(xs) True)
+    | ((length x) == 1 && not positive && (length (x!!0) /= 1)) = [([(firstTerm, grau)], -1)] ++ (traversePolinomioHelper(xs) True)
+    
+    -- 3º variaveis de grau 1 e modulo coef > 1
+    | ((length x) == 2 && positive && length (x!!0) == 1) = [([(firstTerm, 1)], coeficiente)] ++ (traversePolinomioHelper(xs) True)
+    | ((length x) == 2 && not positive && length (x!!0) == 1) = [([(firstTerm, 1)], negate coeficiente)] ++ (traversePolinomioHelper(xs) True)
+    
+    -- 3º variaveis de grau n e modulo coef > 1
+    | ((length x) == 2 && positive && length (x!!0) > 1) = [([(firstTerm, grau)], coeficiente)] ++ (traversePolinomioHelper(xs) True)
+    | ((length x) == 2 && not positive && length (x!!0) > 1) = [([(firstTerm, grau)], negate coeficiente)] ++ (traversePolinomioHelper(xs) True)
+    
     -- 4º variaveis nao simples
-    | ((length x) > 2 && positive) = [(parseMultipleVariables (x) , getDegreeMultipleVariables (x), (read (last x)) :: Int)] ++ (traversePolinomioHelper(xs) True)
-    | ((length x) > 2 && not positive) = [(parseMultipleVariables (x) , getDegreeMultipleVariables (x), negate (read (last x)) :: Int)] ++ (traversePolinomioHelper(xs) True)
+    | ((length x) > 2 && positive) = [(parseMultipleVariables x, (read (last x)) :: Int)] ++ (traversePolinomioHelper(xs) True)
+    | ((length x) > 2 && not positive) = [(parseMultipleVariables x, negate (read (last x)) :: Int)] ++ (traversePolinomioHelper(xs) True)
 
     | otherwise = (traversePolinomioHelper(xs) True)
     
     where {
-        firstTerm = (x!!0);
+        firstTerm = (x!!0) !! 0;
         number = (read (x !! 0) :: Int);
         coeficiente = (read (x !! 1) :: Int);
         grau = read [((x !! 0) !! 2)] :: Int;
@@ -100,62 +108,69 @@ traversePolinomioHelper (x:xs) positive
 
 
 
-
 --funçao que adapta um polinomio em string para um array de truples
 --exemplo: "7*y^2 + 3*y + 5*z" ---> [('y',2,7),('y',1,3),('z',1,5)]
-adaptPolinomio :: String -> [(String, Int, Int)]
+adaptPolinomio :: String -> [([(Char, Int)], Int)]
 adaptPolinomio xs = traversePolinomio (splitPolinomio xs)
 
 
-printPolinomio :: [(String, Int, Int)] -> String
+printVars :: [(Char, Int)]-> String
+printVars [] = ""
+printVars (x:xs)
+    | ((tupleGetVar x) == '~') = printVars xs
+    | ((tupleGetDegree x) == 1) = var ++ lastVar ++ printVars xs
+    | otherwise = var ++ "^" ++ show (tupleGetDegree x) ++ lastVar ++ printVars xs
+    
+    where {
+        lastVar = if(xs == []) then "" else "*";
+        var = [tupleGetVar x];
+    }
+
+printPolinomio :: [([(Char, Int)], Int)] -> String
 printPolinomio xs = printPolinomioHelper xs True
 
 --funcao para dar print de um polinomio
-printPolinomioHelper :: [(String, Int, Int)] -> Bool -> String
+printPolinomioHelper :: [([(Char, Int)], Int)] -> Bool -> String
 printPolinomioHelper [] _ = ""
 printPolinomioHelper (x:xs) first 
     -- 1º se o coeficiente for 0, nao dar print do termo
-    | ((tup2 x) == 0) = printPolinomioHelper xs first
+    | ((arrGetCoef x) == 0) = printPolinomioHelper xs first
     
     -- 2º se for um termo independente
-    | (((tup0 x) == "~") && ((tup2 x) < 0)) = negativePrepend ++ (show (negate (tup2 x))) ++ (printPolinomioHelper xs False)
-    | (((tup0 x) == "~") && ((tup2 x) > 0)) = positivePrepend ++ (show (tup2 x))++ (printPolinomioHelper xs False)
+    | (vars == "") && ((arrGetCoef x) < 0) = negativePrepend ++ (show (negate (arrGetCoef x))) ++ (printPolinomioHelper xs False)
+    | (vars == "") && ((arrGetCoef x) > 0) = positivePrepend ++ (show (arrGetCoef x))++ (printPolinomioHelper xs False)
     
-    -- 3º se for uma variavel com grau 1
-    | ((tup2 x) < 0 && ((tup1 x) == 1)) = negativePrepend ++ negativeCoeficient ++ variable ++ (printPolinomioHelper xs False)
-    | ((tup2 x) > 0 && ((tup1 x) == 1)) = positivePrepend ++  positiveCoeficient ++ variable ++ (printPolinomioHelper xs False)
+    -- 3º se for uma variavel com coeficiente 1 / -1
+    | ((arrGetCoef x) < 0) = negativePrepend ++ negativeCoeficient ++ vars ++ (printPolinomioHelper xs False)
+    | ((arrGetCoef x) > 0) = positivePrepend ++  positiveCoeficient ++ vars ++ (printPolinomioHelper xs False)
+
+    | otherwise = positivePrepend ++  positiveCoeficient ++ vars ++ (printPolinomioHelper xs False)
     
-    
-    -- preciso de arranjar forma para dar print a variaveis complexas
-    
-    
-    | ((tup2 x) < 0 && ((tup1 x) /= 1)) = negativePrepend ++ negativeCoeficient ++ variable ++ "^" ++ (show (tup1 x)) ++ (printPolinomioHelper xs False)
-    
-    | otherwise = (positivePrepend) ++ positiveCoeficient ++ variable ++ "^" ++ (show (tup1 x)) ++ (printPolinomioHelper xs False)
     where {
+        vars = printVars (arrGetVarTuple x);
         negativePrepend = if (first) then "- " else (" - ");
         positivePrepend = if (first) then "" else (" + ");
-        negativeCoeficient = if ((tup2 x) == -1) then "" else ((show (negate (tup2 x)))  ++ "*");
-        positiveCoeficient = if ((tup2 x) == 1) then "" else ((show (tup2 x))  ++ "*");
-        variable = (tup0 x);
+        negativeCoeficient = if ((arrGetCoef x) == -1) then "" else ((show (negate (arrGetCoef x)))  ++ "*");
+        positiveCoeficient = if ((arrGetCoef x) == 1) then "" else ((show (arrGetCoef x))  ++ "*");
     } 
 
 
-
+{-
 
 findMoreVarsWithSameDegree :: String -> Int -> [(String, Int, Int)] -> [(String, Int, Int)]
-findMoreVarsWithSameDegree cr dgr xs = [ x | x<-xs, ((tup0 x) == cr) && (dgr == (tup1 x))]
+findMoreVarsWithSameDegree cr dgr xs = [ x | x<-xs, ((tup0 x) == cr) && (dgr == (arrGetCoef x))]
 
 sumVarsWithSameDegree :: [(String, Int, Int)] -> (String, Int, Int)
-sumVarsWithSameDegree xs =  ((tup0 (xs !! 0)), (tup1 (xs !! 0)), y)
-    where y = sum ([(tup2 x) | x<-xs])
+sumVarsWithSameDegree xs =  ((tup0 (xs !! 0)), (arrGetCoef (xs !! 0)), y)
+    where y = sum ([(arrGetCoef x) | x<-xs])
 
 reducePolinomio :: [(String, Int, Int)] -> [(String, Int, Int)]
-reducePolinomio xs = removeDuplicates [ sumVarsWithSameDegree (findMoreVarsWithSameDegree (tup0 x) (tup1 x) xs) | x<-xs]
+reducePolinomio xs = removeDuplicates [ sumVarsWithSameDegree (findMoreVarsWithSameDegree (tup0 x) (arrGetCoef x) xs) | x<-xs]
 
 normalizarPolinomio :: String -> String
-normalizarPolinomio xs = printPolinomio (reverse (sortOn tup1 (reducePolinomio (adaptPolinomio xs))))
+normalizarPolinomio xs = printPolinomio (reverse (sortOn arrGetCoef (reducePolinomio (adaptPolinomio xs))))
 
 adicionarPolinomio :: String -> String -> String
 adicionarPolinomio x y = normalizarPolinomio (x ++ " " ++ y)
+-}
 
