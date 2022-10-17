@@ -56,7 +56,7 @@ parseMultipleVariables (x:xs) = sort ([(y, getVarDegree x) | y<-x, (((fromEnum y
 --primeiro separar o polinomio, dando origem a uma lista de listas, as quais estao divididas entre coeficiente e variavel*grau de variavel
 --exemplo: "7*y^2 + 3*y + 5*z" ---> [["y^2","7"],["+"],["y","3"],["+"],["z","5"]]
 splitPolinomio :: String -> [[String]]
-splitPolinomio x = [reverse (sortOn length (splitOneOf "*" y)) | y<-(split (oneOf " +-") x), y/="", y/=" "]
+splitPolinomio x =  [(sortOn isNumber (splitOneOf "*" y)) | y<-(split (oneOf " +-") x), y/="", y/=" "]
 
 
 --interface que vai transformar o polinomio separado em uma lista de tuples com o primeiro argumento igual a uma outra lista de tuples (variavel, grau) e segundo argumento igual a coeficiente
@@ -80,8 +80,8 @@ traversePolinomioHelper (x:xs) positive
     | ((length x) == 1 && positive && (length (x!!0) == 1)) = if(isNumber([firstTerm])) then [([('~',0)], (number))] ++ (traversePolinomioHelper(xs) True) else [([(firstTerm, 1)], 1)] ++ (traversePolinomioHelper(xs) True)
     | ((length x) == 1 && not positive && (length (x!!0) == 1)) = if(isNumber([firstTerm])) then [([('~',0)], negate (number))] ++ (traversePolinomioHelper(xs) True) else [([(firstTerm, 1)], -1)] ++ (traversePolinomioHelper(xs) True)
     -- 2º termos com modulo do coef igual a 1 e grau > 1
-    | ((length x) == 1 && positive && (length (x!!0) /= 1)) = [([(firstTerm, grau)], 1)] ++ (traversePolinomioHelper(xs) True)
-    | ((length x) == 1 && not positive && (length (x!!0) /= 1)) = [([(firstTerm, grau)], -1)] ++ (traversePolinomioHelper(xs) True)
+    | ((length x) == 1 && positive && (length (x!!0) /= 1)) = if(isNumber([firstTerm])) then [([('~',0)], (number))] ++ (traversePolinomioHelper(xs) True) else [([(firstTerm, grau)], 1)] ++ (traversePolinomioHelper(xs) True)
+    | ((length x) == 1 && not positive && (length (x!!0) /= 1)) = if(isNumber([firstTerm])) then [([('~',0)], negate (number))] ++ (traversePolinomioHelper(xs) True) else [([(firstTerm, grau)], -1)] ++ (traversePolinomioHelper(xs) True)
     
     -- 3º variaveis de grau 1 e modulo coef > 1
     | ((length x) == 2 && positive && length (x!!0) == 1) = [([(firstTerm, 1)], coeficiente)] ++ (traversePolinomioHelper(xs) True)
