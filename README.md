@@ -3,4 +3,4 @@
 - [x] Normalizar Polinómios
 - [x] Adicionar Polinómios
 - [ ] Multiplicar Polinómios
-- [ ] Calcular a derivada de um polinómio
+- [x] Calcular a derivada de um polinómio

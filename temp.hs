@@ -18,6 +18,9 @@ arrGetVarTuple (x,_) = x
 arrGetDegree :: ([(Char, Int)], Int) -> Int
 arrGetDegree (x,y) = sum [tupleGetDegree (a) | a<-x]
 
+--funçao que pega nos ultimos n elementos de uma string
+lastN :: Int -> [a] -> [a]
+lastN n xs = drop (length xs - n) xs
 
 -- funcao para remover elementos duplicados de uma lista
 removeDuplicates :: (Eq a) => [a] -> [a]
@@ -40,7 +43,7 @@ isNumber str =
 
 --funçao que obtem o grau de uma variavel x^n
 getVarDegree :: String -> Int
-getVarDegree x = if(length x == 1) then 1 else read ([last x]) :: Int
+getVarDegree x = if(length x == 1) then 1 else read (lastN ((length (x))-2) (x)) :: Int;
 
 --funcao que pega no array de um termo e guarda todas as variaveis num tuple(variavel, grau variavel)
 parseMultipleVariables :: [String] -> [(Char, Int)]
@@ -76,10 +79,11 @@ traversePolinomioHelper (x:xs) positive
     -- 1º
     | (((x!!0) == "+") || (last x) == "0") = (traversePolinomioHelper(xs) True)
     | ((x!!0) == "-") = (traversePolinomioHelper(xs) False)
-    -- 2º termos com modulo do coef e grau igual a 1 ou termos independentes
+    -- 2º termos com modulo do coef e grau igual a 1 ou termos independentes menores que 10
     | ((length x) == 1 && positive && (length (x!!0) == 1)) = if(isNumber([firstTerm])) then [([('~',0)], (number))] ++ (traversePolinomioHelper(xs) True) else [([(firstTerm, 1)], 1)] ++ (traversePolinomioHelper(xs) True)
     | ((length x) == 1 && not positive && (length (x!!0) == 1)) = if(isNumber([firstTerm])) then [([('~',0)], negate (number))] ++ (traversePolinomioHelper(xs) True) else [([(firstTerm, 1)], -1)] ++ (traversePolinomioHelper(xs) True)
-    -- 2º termos com modulo do coef igual a 1 e grau > 1
+    
+    -- 2º termos com modulo do coef igual a 1 e grau > 1 ou termos independentes maiores ou igual a 10
     | ((length x) == 1 && positive && (length (x!!0) /= 1)) = if(isNumber([firstTerm])) then [([('~',0)], (number))] ++ (traversePolinomioHelper(xs) True) else [([(firstTerm, grau)], 1)] ++ (traversePolinomioHelper(xs) True)
     | ((length x) == 1 && not positive && (length (x!!0) /= 1)) = if(isNumber([firstTerm])) then [([('~',0)], negate (number))] ++ (traversePolinomioHelper(xs) True) else [([(firstTerm, grau)], -1)] ++ (traversePolinomioHelper(xs) True)
     
@@ -101,7 +105,7 @@ traversePolinomioHelper (x:xs) positive
         firstTerm = (x!!0) !! 0;
         number = (read (x !! 0) :: Int);
         coeficiente = (read (x !! 1) :: Int);
-        grau = read [((x !! 0) !! 2)] :: Int;
+        grau = read (lastN ((length (x !! 0))-2) (x !! 0)) :: Int; -- lastN ((length x)-2)
     }
 
 
@@ -117,7 +121,7 @@ adaptPolinomio xs = traversePolinomio (splitPolinomio xs)
 printVars :: [(Char, Int)]-> String
 printVars [] = ""
 printVars (x:xs)
-    | ((tupleGetVar x) == '~') = printVars xs
+    | ((tupleGetVar x) == '~' || (tupleGetDegree x) == 0) = printVars xs
     | ((tupleGetDegree x) == 1) = var ++ lastVar ++ printVars xs
     | otherwise = var ++ "^" ++ show (tupleGetDegree x) ++ lastVar ++ printVars xs
     
@@ -160,6 +164,11 @@ printPolinomioHelper (x:xs) first
 findMoreVarsWithSameDegree :: [(Char, Int)] -> [([(Char, Int)], Int)] -> [([(Char, Int)], Int)]
 findMoreVarsWithSameDegree cr xs = [ x | x<-xs, (arrGetVarTuple(x)) == cr]
 
+doesTermContainVar :: ([(Char, Int)], Int) -> Char -> Bool
+doesTermContainVar ([], _) _ = False
+doesTermContainVar (x:xs,y) cr = if((tupleGetVar x)==cr) then True else doesTermContainVar (xs,y) cr
+
+
 
 sumVarsWithSameDegree :: [([(Char, Int)], Int)] -> ([(Char, Int)], Int)
 sumVarsWithSameDegree xs = ( arrGetVarTuple (xs!!0), (sum ([(arrGetCoef(x)) | x<-xs])))
@@ -176,4 +185,15 @@ normalizarPolinomio xs = printPolinomio (reverse (sortOn arrGetDegree (reducePol
 adicionarPolinomio :: String -> String -> String
 adicionarPolinomio x y = normalizarPolinomio (x ++ " " ++ y)
 
+-- tenho que travessar a lista de termos e encontrar termos com a variavel pretendida, se tiver baixar em 1 a variavel, se o grau ficar 0, remover da lista de termos
+-- se nao tiver a variavel pretendida, todo esse termo é eliminado
 
+reduceDegree :: [(Char, Int)] -> Char -> [(Char, Int)]
+reduceDegree (x:xs) var = if((tupleGetVar x) == var) then ([(tupleGetVar x, (tupleGetDegree x) -1)] ++ reduceDegree xs var) else ([(tupleGetVar x, tupleGetDegree x)] ++ reduceDegree xs var)
+reduceDegree [] var = []
+
+derivarPolinomio :: String -> Char -> String
+derivarPolinomio xs var = printPolinomio (derivarPolinomioHelper (adaptPolinomio xs) var)
+
+derivarPolinomioHelper :: [([(Char, Int)], Int)] -> Char -> [([(Char, Int)], Int)] 
+derivarPolinomioHelper xs var = [(reduceDegree a var, b) |(a,b)<-xs, (doesTermContainVar (a,b) var)]
