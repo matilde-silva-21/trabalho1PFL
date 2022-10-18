@@ -185,15 +185,20 @@ normalizarPolinomio xs = printPolinomio (reverse (sortOn arrGetDegree (reducePol
 adicionarPolinomio :: String -> String -> String
 adicionarPolinomio x y = normalizarPolinomio (x ++ " " ++ y)
 
+getSpecificVarDegree :: [(Char, Int)] -> Char -> Int
+getSpecificVarDegree (x:xs) y = if(tupleGetVar(x) == y) then (tupleGetDegree x) else getSpecificVarDegree xs y
+getSpecificVarDegree [] _ = 1
+
+
 -- tenho que travessar a lista de termos e encontrar termos com a variavel pretendida, se tiver baixar em 1 a variavel, se o grau ficar 0, remover da lista de termos
 -- se nao tiver a variavel pretendida, todo esse termo é eliminado
 
 reduceDegree :: [(Char, Int)] -> Char -> [(Char, Int)]
-reduceDegree (x:xs) var = if((tupleGetVar x) == var) then ([(tupleGetVar x, (tupleGetDegree x) -1)] ++ reduceDegree xs var) else ([(tupleGetVar x, tupleGetDegree x)] ++ reduceDegree xs var)
+reduceDegree (x:xs) var = if((tupleGetVar x) == var && (tupleGetDegree x) /= 1) then [(tupleGetVar x, (tupleGetDegree x) -1)] ++ reduceDegree xs var else if ((tupleGetVar x) == var && (tupleGetDegree x) == 1) then (reduceDegree xs var) else ([(tupleGetVar x, tupleGetDegree x)] ++ reduceDegree xs var)
 reduceDegree [] var = []
 
 derivarPolinomio :: String -> Char -> String
 derivarPolinomio xs var = printPolinomio (derivarPolinomioHelper (adaptPolinomio xs) var)
 
 derivarPolinomioHelper :: [([(Char, Int)], Int)] -> Char -> [([(Char, Int)], Int)] 
-derivarPolinomioHelper xs var = [(reduceDegree a var, b) |(a,b)<-xs, (doesTermContainVar (a,b) var)]
+derivarPolinomioHelper xs var = [(reduceDegree a var, b*(getSpecificVarDegree a var)) |(a,b)<-xs, (doesTermContainVar (a,b) var)]
