@@ -5,7 +5,7 @@
 ## TO-DO
 - [x] Normalizar Polinómios
 - [x] Adicionar Polinómios
-- [ ] Multiplicar Polinómios
+- [x] Multiplicar Polinómios
 - [x] Calcular a derivada de um polinómio
 
 
@@ -53,13 +53,27 @@ De notar, continuamos a ter dois termos distintos para a variável x com grau 3.
 
 Para adicionar dois polinómios, o programa concatena as strings dos dois polinómios e depois normalizar essa junção. 
 
-<br>```adicionarPolinomio "-2*x*x^2 + 5*10*y - 32 + 4*x^3" "7*y^3 - 24*x^2*z*y^2 - 6*y"``` --> ```"-24*x^2*y^2*z + 7*y^3 + 2*x^3 + 44*y - 32"```
+<br>```haskell
+adicionarPolinomio "-2*x*x^2 + 5*10*y - 32 + 4*x^3" "7*y^3 - 24*x^2*z*y^2 - 6*y"``` --> ```"-24*x^2*y^2*z + 7*y^3 + 2*x^3 + 44*y - 32"```
 
 
 <br>
 
 ### Multiplicar polinómios
 
+A multiplicação dos polinómios é feita a partir da função ```haskell multiplicarPolinomio```.  Esta recebe dois polinómios, adapta-os à representação do programa e aplica-lhes a função ```haskell multiplicarMonomio```.
+<br>
+Relembremos a representação dos termos no programa:
+
+``5*x`` seria ``[([('x',1)],5)]`` e ``4*m + 20*x`` seria ``[([('m',1)],4),([('x',1)],20)]``
+
+A função ```haskkel multiplicarMonomio``` tendo dois monómios, multiplica-os da seguinte forma: concatena as variáveis (o que é equivalente a juntá-los ou seja multiplicar) e multiplica os coeficientes. 
+<br>
+Após esta multiplicação dos monómios, volta a normalizar o resultado antes de o apresentar.
+
+Testemos com os resultados acima representados:
+``*Main> multiplicarPolinomio "4*m + 20*x" "5*x"``
+``"100*x^2 + 20*m*x"``
 
 
 <br>
