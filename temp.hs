@@ -207,7 +207,7 @@ reduceDegree (x:xs) var = if((tupleGetVar x) == var && (tupleGetDegree x) /= 1) 
 reduceDegree [] var = []
 
 derivarPolinomio :: String -> Char -> String
-derivarPolinomio xs var = printPolinomio (derivarPolinomioHelper (adaptPolinomio xs) var)
+derivarPolinomio xs var = printPolinomio (derivarPolinomioHelper (adaptPolinomio (normalizarPolinomio(xs))) var)
 
 derivarPolinomioHelper :: [([(Char, Int)], Int)] -> Char -> [([(Char, Int)], Int)] 
 derivarPolinomioHelper xs var = [(reduceDegree a var, b*(getSpecificVarDegree a var)) |(a,b)<-xs, (doesTermContainVar (a,b) var)]
