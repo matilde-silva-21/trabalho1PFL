@@ -48,7 +48,7 @@ getVarDegree x = if(length x == 1) then 1 else read (lastN ((length (x))-2) (x))
 --funcao que pega no array de um termo e guarda todas as variaveis num tuple(variavel, grau variavel)
 parseMultipleVariables :: [String] -> [(Char, Int)]
 parseMultipleVariables [] = []
-parseMultipleVariables (x:xs) = sort ([(y, getVarDegree x) | y<-x, (((fromEnum y) > 64 && (fromEnum y) < 91) || ((fromEnum y) > 96 && (fromEnum y) < 123))] ++ parseMultipleVariables xs)
+parseMultipleVariables (x:xs) = sort (multiplyVarsInSameTerm ([(y, getVarDegree x) | y<-x, (((fromEnum y) > 64 && (fromEnum y) < 91) || ((fromEnum y) > 96 && (fromEnum y) < 123))] ++ parseMultipleVariables xs))
 
 
 --assumptions feitas:
@@ -176,6 +176,11 @@ findMoreVarsWithSameDegree cr xs = [ x | x<-xs, (arrGetVarTuple(x)) == cr]
 doesTermContainVar :: ([(Char, Int)], Int) -> Char -> Bool
 doesTermContainVar ([], _) _ = False
 doesTermContainVar (x:xs,y) cr = if((tupleGetVar x)==cr) then True else doesTermContainVar (xs,y) cr
+
+
+multiplyVarsInSameTerm :: [(Char, Int)] -> [(Char,Int)]
+multiplyVarsInSameTerm xs = [ (tupleGetVar(singleVarList !! 0), (sum([tupleGetDegree(tup) | tup<-singleVarList ])))| singleVarList<-list]
+    where {list = (removeDuplicates [ [ y | y<-xs, tupleGetVar(x) == tupleGetVar(y)] | x<-xs]);}
 
 
 
