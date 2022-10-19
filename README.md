@@ -13,19 +13,52 @@
 <br>
 
 ## Justificação / Descrição da representação interna de um polinómio
+<br>
 
-A estrutura utilizada para representar o polinómio foi um array de tuples, um tuple por termo, portanto. O tuple é constituído por um array e um int.
-O array representa as variaveis e o int representa o coeficiente do termo. 
-Por sua vez, o array que guarda as variáveis tem como elementos um tuple com um Char (para representar a letra da variável) e um Int (para guardar o grau da variavel). 
-No final, tudo isto junto, dá origem à estrutura [ ( [(Char, Int)] , Int ) ] 
+A estrutura utilizada para representar o polinómio é um <u>_array_ de _tuples_</u>, um _tuple_ por termo, portanto. <br><br>
+Este <u>_tuple_</u> é constituído por um <u>_array_</u> e um <u>_int_</u>. O _array_ representa as __variáveis__ e o _int_ representa o __coeficiente__ do termo. <br>
+Por sua vez, o _array_ que guarda as variáveis tem como elementos um _tuple_ com um __Char__ (para representar a __letra da variável__) e um __Int__ (para guardar o __grau da variável__). <br><br>
+No final, tudo isto junto, dá origem à estrutura **[ ( [(Char, Int)] , Int ) ]**. <br>
 
-Vejamos um exemplo:
+Vejamos alguns exemplos:
 
-O polinómio "```4*x*y^3```" tem coeficiente 4 e como variáveis tem x com grau 1 e y com grau 3, pelo que a lista de variáveis seria igual a [('x',1),('y',3)]. Por isso, o termo na sua íntegra é representavel pelo tuple ([('x',1),('y',3)], 4). Neste caso, como o polinómio só tem um termo, o array de termos vai ter length 1, e será igual a [([('x',1),('y',3)], 4)].
+- O polinómio "```4*x*y^3```" tem:
+  - 1 termo;
+  - __coeficiente__ 4;
+  - como __variáveis__:
 
-Mais um exemplo:
+     | Termo Independente  | Grau |
+     | ------------- | ------------- |
+     | x  | 1  |
+     | y | 3  |
 
-"```-2*x + 5*y^6 - 32```"  ---> [([('x',1)],-2) , ([('y',6)],5), ([('~', 0)],-32)]
+  A lista de variáveis seria então: __[('x',1),('y',3)]__
+  Por isso, o termo na sua íntegra é representável pelo tuple __([('x',1),('y',3)], 4)__. <br>
+  Neste caso, como o polinómio só tem um termo, o array de termos vai ter _length_ 1, e será igual a: **[([('x',1),('y',3)], 4)]**.
+<br><br>
+ - O polinómio "```-2*x + 5*y^6 - 32```" tem:
+    - 3 termos:
+      - (a) -2*x;
+      - (b) 5*y^6;
+      - (c) -32.
+  
+   - O termo (a) tem:
+  
+     - __coeficiente__ -2;
+     - como __variáveis__: x com grau 1;
+     - a sua representação seria: **[([('x',1)],-2)]**.<br>
+  
+   - O termo (b) tem:
+     - **coeficiente** 5;
+     - como **variáveis**: y com grau 6;
+     - a sua representação seria: **[([('y',6)],5)]**<br>
+  
+   - O termo (c) tem:
+     - **coeficiente** -32;
+     - sem variáveis (grau 0);
+     - a sua representação seria: **[([('~',0)],32)]**<br>
+  
+Logo: <br>"```-2*x + 5*y^6 - 32```"  ---> [([('x',1)],-2) , ([('y',6)],5), ([('~', 0)],-32)]
 
 
 Esta foi a estrutura escolhida pois garantia o armazenamento do grau de cada variável de um termo de forma individual (preservando, assim, o seu grau) sem abdicar da possibilidade de mexer nas variáveis como um conjunto.
