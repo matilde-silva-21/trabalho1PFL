@@ -54,12 +54,21 @@ parseMultipleVariables (x:xs) = sort ([(y, getVarDegree x) | y<-x, (((fromEnum y
 --assumptions feitas:
 --      o coeficiente vem SEMPRE antes das variaveis a*x*y
 --      nao existem vars do tipo x*x
---      nao existem termos do tipo a*b*x, em que a*b é o coef
 
 --primeiro separar o polinomio, dando origem a uma lista de listas, as quais estao divididas entre coeficiente e variavel*grau de variavel
 --exemplo: "7*y^2 + 3*y + 5*z" ---> [["y^2","7"],["+"],["y","3"],["+"],["z","5"]]
 splitPolinomio :: String -> [[String]]
-splitPolinomio x =  [(sortOn isNumber (splitOneOf "*" y)) | y<-(split (oneOf " +-") x), y/="", y/=" "]
+splitPolinomio x =  [if (length (sortOn isNumber (splitOneOf "*" y)) /= 1) then ((removeNumbers(sortOn isNumber (splitOneOf "*" y))) ++ [show (multiplyArray(findNumbers(sortOn isNumber (splitOneOf "*" y))))]) else ((removeNumbers(sortOn isNumber (splitOneOf "*" y)))) | y <-(split (oneOf " +-") x), y/="", y/=" "]
+
+findNumbers :: [String] ->  [Int]
+findNumbers y = [(read a) :: Int | a<-y, (isNumber a)]
+
+removeNumbers :: [String] -> [String]
+removeNumbers xs = [a | a<-xs, not (isNumber a)]
+
+multiplyArray :: [Int] -> Int
+multiplyArray (x:xs) = x*(multiplyArray xs)
+multiplyArray [] = 1
 
 
 --interface que vai transformar o polinomio separado em uma lista de tuples com o primeiro argumento igual a uma outra lista de tuples (variavel, grau) e segundo argumento igual a coeficiente
