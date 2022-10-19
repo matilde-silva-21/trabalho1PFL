@@ -29,4 +29,10 @@ Mais um exemplo:
 
 Esta foi a estrutura escolhida pois garantia o armazenamento do grau de cada variável de um termo de forma individual (preservando, assim, o seu grau) sem abdicar da possibilidade de mexer nas variáveis como um conjunto.
 
+## Implementação de cada funcionalidade
 
+### Normalização de polinómios
+
+Primeiro, aquando o parse inicial da string do polinómio, discarda termos que são multiplicados por 0. Além disso, verifica também se o termo tem mais que um coeficiente a multiplicar e guarda na estrutura o valor de coeficiente já multiplicado. No entanto, para os casos em que é ```x*x``` ou semelhante, a multiplicação de variáveis só ocorre após o polinómio já ter sido guardado. 
+
+Portanto, inicialmente o polinómio "```-2*x*x^2 + 5*10*y - 32```", quando passado pela função adaptPolinomio 

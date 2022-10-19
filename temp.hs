@@ -58,7 +58,7 @@ parseMultipleVariables (x:xs) = sort (multiplyVarsInSameTerm ([(y, getVarDegree 
 --primeiro separar o polinomio, dando origem a uma lista de listas, as quais estao divididas entre coeficiente e variavel*grau de variavel
 --exemplo: "7*y^2 + 3*y + 5*z" ---> [["y^2","7"],["+"],["y","3"],["+"],["z","5"]]
 splitPolinomio :: String -> [[String]]
-splitPolinomio x =  [if (length (sortOn isNumber (splitOneOf "*" y)) /= 1) then ((removeNumbers(sortOn isNumber (splitOneOf "*" y))) ++ [show (multiplyArray(findNumbers(sortOn isNumber (splitOneOf "*" y))))]) else ((removeNumbers(sortOn isNumber (splitOneOf "*" y)))) | y <-(split (oneOf " +-") x), y/="", y/=" "]
+splitPolinomio x =  [if (length (sortOn isNumber (splitOneOf "*" y)) /= 1) then ((removeNumbers(sortOn isNumber (splitOneOf "*" y))) ++ [show (multiplyArray(findNumbers(sortOn isNumber (splitOneOf "*" y))))]) else (sortOn isNumber (splitOneOf "*" y)) | y <-(split (oneOf " +-") x), y/="", y/=" "]
 
 findNumbers :: [String] ->  [Int]
 findNumbers y = [(read a) :: Int | a<-y, (isNumber a)]
