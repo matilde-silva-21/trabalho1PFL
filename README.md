@@ -103,9 +103,9 @@ Relembremos a representação dos termos no programa:
 A função ```haskkel multiplicarMonomio``` tendo dois monómios, multiplica-os da seguinte forma: concatena as variáveis (o que é equivalente a juntá-los ou seja multiplicar) e multiplica os coeficientes. 
 <br>
 Após esta multiplicação dos monómios, volta a normalizar o resultado antes de o apresentar.
-
-Testemos com os resultados acima representados:
-``*Main> multiplicarPolinomio "4*m + 20*x" "5*x"``
+<br>
+Testemos com os resultados acima representados:<br>
+``*Main> multiplicarPolinomio "4*m + 20*x" "5*x"``<br>
 ``"100*x^2 + 20*m*x"``
 
 
