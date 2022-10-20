@@ -216,7 +216,8 @@ reduceDegree [] var = []
 
 --funçao que da print ao polinomio derivado
 derivarPolinomio :: String -> Char -> String
-derivarPolinomio xs var = printPolinomio (derivarPolinomioHelper (adaptPolinomio (normalizarPolinomio(xs))) var)
+derivarPolinomio xs var = if (pol == "") then "0" else pol 
+    where {pol = printPolinomio (derivarPolinomioHelper (adaptPolinomio (normalizarPolinomio(xs))) var);}
 
 --funcao que faz o trabalho pesado da derivaçao
 derivarPolinomioHelper :: [([(Char, Int)], Int)] -> Char -> [([(Char, Int)], Int)] 
