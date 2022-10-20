@@ -54,8 +54,9 @@ parseMultipleVariables (x:xs) = sort (multiplyVarsInSameTerm ([(y, getVarDegree 
 
 
 --assumptions feitas:
---      o coeficiente vem SEMPRE antes das variaveis a*x*y
---      nao existem vars do tipo x*x
+--      não existem parênteses nos polinómios
+--      as multiplicações são todas delimitadas por '*'
+
 
 --primeiro separar o polinomio, dando origem a uma lista de listas, as quais estao divididas entre coeficiente e variavel*grau de variavel
 --exemplo: "7*y^2 + 3*y + 5*z" ---> [["y^2","7"],["+"],["y","3"],["+"],["z","5"]]
