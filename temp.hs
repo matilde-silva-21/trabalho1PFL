@@ -18,6 +18,8 @@ arrGetVarTuple (x,_) = x
 arrGetDegree :: ([(Char, Int)], Int) -> Int
 arrGetDegree (x,y) = sum [tupleGetDegree (a) | a<-x]
 
+
+
 --funçao que pega nos ultimos n elementos de uma string
 lastN :: Int -> [a] -> [a]
 lastN n xs = drop (length xs - n) xs
@@ -126,7 +128,7 @@ traversePolinomioHelper (x:xs) positive
 adaptPolinomio :: String -> [([(Char, Int)], Int)]
 adaptPolinomio xs = traversePolinomio (splitPolinomio xs)
 
-
+--funçao que da print a variáveis complexas
 printVars :: [(Char, Int)]-> String
 printVars [] = ""
 printVars (x:xs)
@@ -169,54 +171,59 @@ printPolinomioHelper (x:xs) first
 
 
 
-
+--funçao que recebe um a struct do polinomio e uma lista de variaveis e retorna apenas os membros do polinómio com variáveis iguais à do segundo argumento
 findMoreVarsWithSameDegree :: [(Char, Int)] -> [([(Char, Int)], Int)] -> [([(Char, Int)], Int)]
 findMoreVarsWithSameDegree cr xs = [ x | x<-xs, (arrGetVarTuple(x)) == cr]
 
+--funçao que verifica se um termo de um polinómio contém uma variável específica (por exemplo verifica se ([('y',2),('x',1)],2) contém 'y')
 doesTermContainVar :: ([(Char, Int)], Int) -> Char -> Bool
 doesTermContainVar ([], _) _ = False
 doesTermContainVar (x:xs,y) cr = if((tupleGetVar x)==cr) then True else doesTermContainVar (xs,y) cr
 
 
+--funçao que multiplica a mesma variavel dentro de um unico termo (ou seja transforma 2*x*x em 2*x^2)
 multiplyVarsInSameTerm :: [(Char, Int)] -> [(Char,Int)]
 multiplyVarsInSameTerm xs = [ (tupleGetVar(singleVarList !! 0), (sum([tupleGetDegree(tup) | tup<-singleVarList ])))| singleVarList<-list]
     where {list = (removeDuplicates [ [ y | y<-xs, tupleGetVar(x) == tupleGetVar(y)] | x<-xs]);}
 
 
-
+--funçao que recebe um polinomio e procura todos os termos de igual grau e variável e soma-os (por exemplo [([('x',1)], 2) , ([('x',1)], 2)] passa a ser [([('x',1)], 4)])
 sumVarsWithSameDegree :: [([(Char, Int)], Int)] -> ([(Char, Int)], Int)
 sumVarsWithSameDegree xs = ( arrGetVarTuple (xs!!0), (sum ([(arrGetCoef(x)) | x<-xs])))
 
-
+--reduz o polinomio usando as funçoes em cima
 reducePolinomio :: [([(Char, Int)], Int)] -> [([(Char, Int)], Int)]
 reducePolinomio xs = removeDuplicates [ sumVarsWithSameDegree (findMoreVarsWithSameDegree (arrGetVarTuple x) xs) | x<-xs]
 
-
+--funçao reduce polinomio mas com input e output de string
 normalizarPolinomio :: String -> String
 normalizarPolinomio xs = printPolinomio (reverse (sortOn arrGetDegree (reducePolinomio (adaptPolinomio xs))))
 
-
+--funçao para adicionar 2 polinomios
 adicionarPolinomio :: String -> String -> String
 adicionarPolinomio x y = normalizarPolinomio (x ++ " " ++ y)
 
+--funçao que procura num dado termo o grau de uma variavel especifica
 getSpecificVarDegree :: [(Char, Int)] -> Char -> Int
 getSpecificVarDegree (x:xs) y = if(tupleGetVar(x) == y) then (tupleGetDegree x) else getSpecificVarDegree xs y
 getSpecificVarDegree [] _ = 1
 
-
--- tenho que travessar a lista de termos e encontrar termos com a variavel pretendida, se tiver baixar em 1 a variavel, se o grau ficar 0, remover da lista de termos
--- se nao tiver a variavel pretendida, todo esse termo é eliminado
-
+--funçao que recebe as variaveis de um termo e uma só variavel, e depois reduz o grau de todos os termos que contem essa variavel
 reduceDegree :: [(Char, Int)] -> Char -> [(Char, Int)]
 reduceDegree (x:xs) var = if((tupleGetVar x) == var && (tupleGetDegree x) /= 1) then [(tupleGetVar x, (tupleGetDegree x) -1)] ++ reduceDegree xs var else if ((tupleGetVar x) == var && (tupleGetDegree x) == 1) then (reduceDegree xs var) else ([(tupleGetVar x, tupleGetDegree x)] ++ reduceDegree xs var)
 reduceDegree [] var = []
 
+--funçao que da print ao polinomio derivado
 derivarPolinomio :: String -> Char -> String
 derivarPolinomio xs var = printPolinomio (derivarPolinomioHelper (adaptPolinomio (normalizarPolinomio(xs))) var)
 
+--funcao que faz o trabalho pesado da derivaçao
 derivarPolinomioHelper :: [([(Char, Int)], Int)] -> Char -> [([(Char, Int)], Int)] 
 derivarPolinomioHelper xs var = [(reduceDegree a var, b*(getSpecificVarDegree a var)) |(a,b)<-xs, (doesTermContainVar (a,b) var)]
 
+multiplicarMonomio :: ([(Char, Int)], Int) -> ([(Char, Int)], Int) -> ([(Char, Int)], Int)
+multiplicarMonomio x y = (arrGetVarTuple x ++ arrGetVarTuple y, arrGetCoef x * arrGetCoef y)
+
 multiplicarPolinomio :: String -> String -> String
 multiplicarPolinomio x y = normalizarPolinomio(printPolinomio [multiplicarMonomio a b | a <- adaptPolinomio x, b <- adaptPolinomio y])
-multiplicarMonomio x y = (arrGetVarTuple x ++ arrGetVarTuple y, arrGetCoef x * arrGetCoef y) 
+ 
