@@ -219,4 +219,5 @@ derivarPolinomioHelper xs var = [(reduceDegree a var, b*(getSpecificVarDegree a 
 
 multiplicarPolinomio :: String -> String -> String
 multiplicarPolinomio x y = normalizarPolinomio(printPolinomio [multiplicarMonomio a b | a <- adaptPolinomio x, b <- adaptPolinomio y])
-multiplicarMonomio x y = (arrGetVarTuple x ++ arrGetVarTuple y, arrGetCoef x * arrGetCoef y) 
+
+multiplicarMonomio x y = (arrGetVarTuple x ++ arrGetVarTuple y, arrGetCoef x * arrGetCoef y)  -- concatena os dois valores para a mesma lista (o mesmo que dizer que fazem parte do mesmo termo) e multiplica os coeficientes de cada um
