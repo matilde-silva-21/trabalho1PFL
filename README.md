@@ -1,19 +1,6 @@
 # Trabalho 1 - PFL
 
-
-
-## TO-DO
-- [x] Normalizar Polinómios
-- [x] Adicionar Polinómios
-- [x] Multiplicar Polinómios
-- [x] Calcular a derivada de um polinómio
-
-
-<br>
-<br>
-
 ## Justificação / Descrição da representação interna de um polinómio
-<br>
 
 A estrutura utilizada para representar o polinómio é um ___array___ de ___tuples___, um ___tuple___ por termo, portanto. <br><br>
 Este <u>_tuple_</u> é constituído por um ___array___ e um ___int___. O _array_ representa as __variáveis__ e o _int_ representa o __coeficiente__ do termo. <br>
@@ -41,34 +28,92 @@ Vejamos alguns exemplos:
 
      | Termo  | Coeficiente | Variável | Grau | Representação |
      | ------------- | ------------- |------------- |------------- |------------- |
-     | -2*x  | -2  | x | 1 | __[([('x',1)],-2)]__ |
-     |  5*y^6 | 5  | y | 6 | __[([('y',6)],5)]__ |
-     |  -32 | -32  | - | 0 | __[([('~',0)],32)]__ |
+     | -2*x  | -2  | x | 1 | __[ ( [ ('x',1)],-2) ]__ |
+     |  5*y^6 | 5  | y | 6 | __[ ( [ ('y',6)],5) ]__ |
+     |  -32 | -32  | - | 0 | __[ ( [ ('~',0)],32 ) ]__ |
   
 <br>
 
-Logo: <br> ```-2*x + 5*y^6 - 32```  &rarr; **[ ([('x',1)],-2) , ([('y',6)],5) , ([('~', 0)],-32) ]**
+Logo: <br> ```-2*x + 5*y^6 - 32```  &rarr; [ ``( [ ('x',1) ],-2 )`` , ``( [ ('y',6) ] ,5 )`` , ``( [ ('~', 0) ],-32 )`` ]
 
 
 Esta foi a estrutura escolhida pois garantia o armazenamento do grau de cada variável de um termo de forma individual (preservando, assim, o seu grau) sem abdicar da possibilidade de mexer nas variáveis como um conjunto.
 
 <br>
-<br>
 
 ## Implementação de cada funcionalidade
 
-<br>
+### Checklist
+- [x] Normalizar Polinómios
+- [x] Adicionar Polinómios
+- [x] Multiplicar Polinómios
+- [x] Calcular a derivada de um polinómio
 
 ### Normalização de polinómios
 
-Primeiro, aquando o parse inicial da string do polinómio, discarda termos que são multiplicados por 0. Além disso, verifica também se o termo tem mais que um coeficiente a multiplicar e guarda na estrutura o valor de coeficiente já multiplicado. No entanto, para os casos em que é ```x*x``` ou semelhante, a multiplicação de variáveis só ocorre após o polinómio já ter sido guardado. 
+Primeiro, aquando o parse inicial da string do polinómio, descarta termos que são multiplicados por 0. Além disso, verifica também se o termo tem mais que um coeficiente a multiplicar e guarda na estrutura o valor de coeficiente já multiplicado. 
+<br>
 
-Portanto, inicialmente o polinómio "```-2*x*x^2 + 5*10*y - 32 + 4*x^3```", transforma-se em ```[["-"],["x","x^2","2"],["+"],["y","50"],["-"],["32"],["+"],["x^3","4"]]``` através de splitPolinomio. Depois a função traversePolinomio transforma ```[["-"],["x","x^2","2"],["+"],["y","50"],["-"],["32"],["+"],["x^3","4"]]``` em ```[([('x',1),('x',2)],-2),([('y',1)],50),([('~',0)],-32),([('x',3)],4)]``` e só depois de chamar a função multiplyVarsInSameTerm é que o polinómio fica convertido na sua íntegra, ```[([('x',3)],-2),([('y',1)],50),([('~',0)],-32),([('x',3)],4)]```.
+No entanto, para os casos em que é ```x*x``` ou semelhante, a multiplicação de variáveis só ocorre após o polinómio já ter sido guardado.   
 
-De notar, continuamos a ter dois termos distintos para a variável x com grau 3. Para finalizar a normalização, chamamos uma função que reune todos os membros do array com igual variável e grau e soma os seus coeficientes. Portanto, passamos de ```[([('x',3)],-2),([('y',1)],50),([('~',0)],-32),([('x',3)],4)]``` para ```[([('x',3)],2),([('y',1)],50),([('~',0)],-32)]```. Resta apenas fazer print ao polinomio (função printPolinomio).
+<br>
+
+Portanto, inicialmente o polinómio 
+<div align="center">
+
+```-2*x*x^2 + 5*10*y - 32 + 4*x^3```
+</div>
+
+transforma-se, através do splitPolinomio, em: 
+
+
+
+<div align="center">
+
+```[["-"],["x","x^2","2"],["+"],["y","50"],["-"],["32"],["+"],["x^3","4"]]``` 
+</div>
+
+<br>
+<br>
+
+Depois a função traversePolinomio transforma 
+<div align="center">
+
+```[ [ "-" ] , [ "x" , "x^2" , "2" ] , [ "+" ] , [ "y" , "50" ] , [ "-" ],[ "32" ],[ "+" ],[ "x^3" , "4" ] ]```
+</div>
+
+em:
+<div align="center">
+
+```[ ( [ ( 'x' , 1 ) , ( 'x' , 2 ) ] , -2 ) , ( [ ( 'y' , 1 ) ] , 50 ) , ( [ ( '~' , 0 ) ] ,-32 ) , ( [ ( 'x' , 3 ) ] , 4 ) ]``` 
+
+</div>
+e só depois de chamar a função multiplyVarsInSameTerm é que o polinómio fica convertido na sua íntegra:
+
+
+<div align="center">
+<br>
+
+```[ ( [ ( 'x' , 3 ) ] , -2 ) , ( [ ( 'y' , 1 ) ] , 50 ) , ( [ ( '~' , 0 ) ] , -32 ) , ( [ ( 'x' , 3 ) ] , 4 ) ]```.
+</div> 
+
+De notar, continuamos a ter dois termos distintos para a variável x com grau 3. Para finalizar a normalização, chamamos uma função que reune todos os membros do array com igual variável e grau e soma os seus coeficientes. Portanto, passamos de 
+<div align="center">
+
+```[([('x',3)],-2),([('y',1)],50),([('~',0)],-32),([('x',3)],4)]```
+</div>
+
+para 
+<div align="center">
+
+```[([('x',3)],2),([('y',1)],50),([('~',0)],-32)]```
+
+</div>
+Resta apenas fazer print ao polinomio (função printPolinomio).
 
 <br>normalizarPolinomio "```-2*x*x^2 + 5*10*y - 32 + 4*x^3```" --> "```2*x^3 + 50*y - 32```"
 
+A ordenação do polinómio é feita depois por grau.
 <br>
 
 ### Adicionar polinómios
