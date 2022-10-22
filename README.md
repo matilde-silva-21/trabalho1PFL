@@ -134,7 +134,7 @@ Relembremos a representação dos termos no programa:
 
 ``5*x`` seria ``[([('x',1)],5)]`` e ``4*m + 20*x`` seria ``[([('m',1)],4),([('x',1)],20)]``
 
-A função ```haskkel multiplicarMonomio``` tendo dois monómios, multiplica-os da seguinte forma: concatena as variáveis (o que é equivalente a juntá-los ou seja multiplicar) e multiplica os coeficientes. 
+A função ```haskell multiplicarMonomio``` tendo dois monómios, multiplica-os da seguinte forma: concatena as variáveis (o que é equivalente a juntá-los ou seja multiplicar) e multiplica os coeficientes. 
 <br>
 Após esta multiplicação dos monómios, volta a normalizar o resultado antes de o apresentar.
 <br>
@@ -151,7 +151,30 @@ A função derivarPolinomio recebe como argumentos a string polinómio e um char
 
 <br>```derivarPolinomio "-2*x*x^2 + 5*10*y - 32 + 4*x^3" 'x'``` --> ```"6*x^2"```
 <br>```derivarPolinomio "-2*x*x^2 + 5*10*y - 32 + 4*x^3" 'y'``` --> ```"50"```
-<br>```derivarPolinomio "-2*x*x^2 + 5*10*y - 32 + 4*x^3" 'z'``` --> ```""```
+<br>```derivarPolinomio "-2*x*x^2 + 5*10*y - 32 + 4*x^3" 'z'``` --> ```"0"```
 
 
+## Exemplos de utilização
+
+<br>
+
+### Normalizar Polinómio
+
+<br>
+
+```normalizarPolinomio "" --> "0"```
+<br>```normalizarPolinomio "3*x*y*z + 3*x^3*y*y - 37*y^2*x^3 -438+21" --> "-34*x^3*y^2 + 3*x*y*z - 417"```
+<br>```normalizarPolinomio "6*2*x*x" --> "12*x^2"```
+<br>```normalizarPolinomio "-  2*w+    7*w^2" --> "7*w^2 - 2*w"```
+
+<br>
+
+### Adicionar Polinómio
+
+<br>
+
+```adicionarPolinomio "2" "-2" --> "0"```
+<br>```adicionarPolinomio "2*x" "-2*y" --> "-2*y + 2*x"```
+<br>```adicionarPolinomio "-7*x^2*y*x + 5*32" "-2*y" --> "-7*x^3*y - 2*y + 160"```
+<br>```adicionarPolinomio "-7*x^2*y*x" "120*y*x^3" --> "113*x^3*y"```
 
