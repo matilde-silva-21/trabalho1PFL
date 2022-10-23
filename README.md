@@ -184,3 +184,22 @@ A função derivarPolinomio recebe como argumentos a string polinómio e um char
 <br>```adicionarPolinomio "-7*x^2*y*x + 5*32" "-2*y" --> "-7*x^3*y - 2*y + 160"```
 <br>```adicionarPolinomio "-7*x^2*y*x" "120*y*x^3" --> "113*x^3*y"```
 
+<br>
+
+### Multiplicar Polinómio
+
+<br>
+
+<br>```multiplicarPolinomio "2*x + 3*y*x" "6*z*y" --> "18*x*y^2*z + 12*x*y*z"```
+<br>```multiplicarPolinomio "2*x*x+ 3*y + m" "y+10*x" --> "20*x^3 + 2*x^2*y + 10*m*x + m*y + 30*x*y + 3*y^2"```
+<br>```multiplicarPolinomio "x" "-y*x" --> "-x^2*y" ```
+
+<br>
+
+### Derivar Polinómio
+
+<br>
+
+<br>```derivarPolinomio "2*x*y + y" 'x' --> "2*y"```
+<br>```derivarPolinomio "2*x*y + y" 'm' --> "0"```
+<br>```derivarPolinomio "2*m^2*y + 3*m*x" 'm' --> "4*m*y + 3*x"```
