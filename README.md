@@ -1,5 +1,11 @@
 # Trabalho 1 - PFL
 
+## Grupo G09_01
+
+Mariana Rocha up202004656
+Matilde Silva up202007928
+
+
 ## Justificação / Descrição da representação interna de um polinómio
 
 A estrutura utilizada para representar o polinómio é um ___array___ de ___tuples___, um ___tuple___ por termo, portanto. <br><br>

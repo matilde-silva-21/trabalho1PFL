@@ -223,9 +223,11 @@ derivarPolinomio xs var = printPolinomio (derivarPolinomioHelper (adaptPolinomio
 derivarPolinomioHelper :: [([(Char, Int)], Int)] -> Char -> [([(Char, Int)], Int)] 
 derivarPolinomioHelper xs var = [(reduceDegree a var, b*(getSpecificVarDegree a var)) |(a,b)<-xs, (doesTermContainVar (a,b) var)]
 
+--funcao que concatena as variaveis de dois monomios (o mesmo que as multiplicar) e multiplica os expoentes servindo assim para multiplicar monomios
 multiplicarMonomio :: ([(Char, Int)], Int) -> ([(Char, Int)], Int) -> ([(Char, Int)], Int)
 multiplicarMonomio x y = (arrGetVarTuple x ++ arrGetVarTuple y, arrGetCoef x * arrGetCoef y)
 
+--funcao que recebe dois polinomios e os multiplica fazendo uso de uma funçao, mais simples, que multiplica monomios
 multiplicarPolinomio :: String -> String -> String
 multiplicarPolinomio x y = normalizarPolinomio(printPolinomio [multiplicarMonomio a b | a <- adaptPolinomio x, b <- adaptPolinomio y])
  
