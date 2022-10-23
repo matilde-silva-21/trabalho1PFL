@@ -2,8 +2,8 @@
 
 ## Grupo G09_01
 
-Mariana Rocha up202004656
-Matilde Silva up202007928
+- Mariana Rocha up202004656
+- Matilde Silva up202007928
 
 
 ## Justificação / Descrição da representação interna de um polinómio
